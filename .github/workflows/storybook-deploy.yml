@@ -20,7 +20,21 @@ jobs:
         run: npm run build-storybook
 
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'push'
         uses: JamesIves/github-pages-deploy-action@4.1.7
         with:
           branch: gh-pages
           folder: storybook-static
+
+      - name: Upload Storybook artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: storybook-preview
+          path: storybook-static
+
+      - name: Comment PR with Storybook preview
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "📖 Storybook preview for this PR is available. Download and run it locally to review UI changes."
