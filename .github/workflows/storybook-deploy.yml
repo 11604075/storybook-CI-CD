@@ -28,7 +28,7 @@ jobs:
 
       - name: Upload Storybook artifact
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: storybook-preview
           path: storybook-static
