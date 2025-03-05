@@ -1,13 +1,13 @@
 .button {
   color: red;
-  padding: 65px 65px;
+  padding: 60px 60px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 25px;
   border-radius: 4px;
   cursor: pointer;
-  width: 600px;
+  width: 700px;
   
 }
 
