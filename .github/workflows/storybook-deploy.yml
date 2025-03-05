@@ -38,7 +38,13 @@ jobs:
 
       - name: Debug: List generated files
         if: always()  # Run this step even if previous steps fail
-        run: ls -R tests/storybook-screenshots.spec.js-snapshots/ || echo "No diff images found"
+        run: |
+          echo "Checking snapshot folder..."
+          if [ -d "tests/storybook-screenshots.spec.js-snapshots/" ]; then
+            ls -R tests/storybook-screenshots.spec.js-snapshots/
+          else
+            echo "No diff images found"
+          fi
 
       - name: Upload Only Diff Images (if test fails)
         if: failure() || steps.test.outcome == 'failure'
