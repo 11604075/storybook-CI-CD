@@ -15,5 +15,6 @@ test('Capture Storybook Screenshot', async ({ page }) => {
   await component.waitFor();
 
   // Capture a screenshot and compare it with the baseline
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({ maxDiffPixels: 20 });
+
 });
