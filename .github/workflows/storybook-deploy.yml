@@ -31,11 +31,12 @@ jobs:
       - name: Start Storybook in the background
         run: npm run storybook & npx wait-on http://localhost:6006
 
-      - name: Capture Storybook Screenshots
-        run: npx playwright test tests/storybook-screenshots.spec.js
+      - name: Run Playwright Tests (Screenshot Comparison)
+        run: npx playwright test
 
-      - name: Upload Storybook Screenshots
+      - name: Upload Snapshot Differences (if test fails)
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: storybook-screenshots
-          path: "*.png"
+          name: snapshot-differences
+          path: tests/snapshots-diff/
