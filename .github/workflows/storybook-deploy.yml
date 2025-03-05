@@ -36,17 +36,6 @@ jobs:
         continue-on-error: true
         run: npx playwright test
 
-      - name: Debug: Check if diff images exist
-        if: always()
-        run: |
-          echo "Checking if diff images exist..."
-          if [ -d "tests/storybook-screenshots.spec.js-snapshots/__diff_snapshots__" ]; then
-            echo "Diff images found:"
-            ls -R tests/storybook-screenshots.spec.js-snapshots/__diff_snapshots__
-          else
-            echo "No diff images found"
-          fi
-
       - name: Upload Only Diff Images (if test fails)
         if: failure() || steps.test.outcome == 'failure'
         uses: actions/upload-artifact@v4
