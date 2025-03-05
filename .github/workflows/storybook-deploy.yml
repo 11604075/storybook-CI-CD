@@ -32,15 +32,20 @@ jobs:
         run: npm run storybook & npx wait-on http://localhost:6006
 
       - name: Run Playwright Tests (Screenshot Comparison)
-        run: npx playwright test || npx playwright test --update-snapshots
+        id: test
+        run: npx playwright test
 
-      - name: Upload Updated Snapshots (if created)
+      - name: Run Playwright with Snapshot Update (if needed)
         if: failure()
+        run: npx playwright test --update-snapshots
+
+      - name: Upload Snapshot Differences (if test fails)
+        if: failure() || steps.test.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: updated-snapshots
+          name: snapshot-differences
           path: tests/storybook-screenshots.spec.js-snapshots/
 
-      - name: Fail if Snapshots Changed
-        if: failure()
+      - name: Fail the Job if Snapshots Changed
+        if: failure() || steps.test.outcome == 'failure'
         run: exit 1
