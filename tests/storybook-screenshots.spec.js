@@ -1,16 +1,19 @@
 import { test, expect } from '@playwright/test';
 
 test('Capture Storybook Screenshot', async ({ page }) => {
-  // Run Storybook locally before this test
-  await page.goto('http://localhost:6006'); // Adjust the URL if needed
+  // Open Storybook
+  await page.goto('http://localhost:6006'); 
 
-  // Wait for the Storybook UI to load
-  await page.waitForSelector('#storybook-explorer-menu'); 
+  // Wait for Storybook UI to load
+  await page.waitForSelector('#storybook-explorer-menu', { timeout: 10000 });
 
-  // Capture screenshot of the entire Storybook UI
-  await page.screenshot({ path: 'storybook-screenshot.png', fullPage: true });
+  // Locate Storybook’s iframe
+  const iframe = page.frameLocator('iframe#storybook-preview-iframe');
 
-  // Capture a specific component (adjust selector accordingly)
-  const component = await page.$('.sb-show-main');
-  await component.screenshot({ path: 'component-screenshot.png' });
+  // Wait for the component inside the iframe to load
+  const component = iframe.locator('body');  
+  await component.waitFor();
+
+  // Take a screenshot of the component
+  await expect(component).toHaveScreenshot('component-snapshot.png');
 });
