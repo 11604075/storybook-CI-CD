@@ -35,16 +35,12 @@ jobs:
         id: test
         run: npx playwright test
 
-      - name: Run Playwright with Snapshot Update (if needed)
-        if: failure()
-        run: npx playwright test --update-snapshots
-
-      - name: Upload Snapshot Differences (if test fails)
+      - name: Upload Screenshot Differences (if test fails)
         if: failure() || steps.test.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: snapshot-differences
-          path: tests/storybook-screenshots.spec.js-snapshots/
+          name: screenshot-diff
+          path: tests/storybook-screenshots.spec.js-snapshots/  # Adjust this path if needed
 
       - name: Fail the Job if Snapshots Changed
         if: failure() || steps.test.outcome == 'failure'
