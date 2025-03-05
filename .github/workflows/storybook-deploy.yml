@@ -33,14 +33,16 @@ jobs:
 
       - name: Run Playwright Tests (Screenshot Comparison)
         id: test
+        continue-on-error: true  # Continue even if test fails
         run: npx playwright test
 
-      - name: Upload Screenshot Differences (if test fails)
+      - name: Upload Only Diff Images (if test fails)
         if: failure() || steps.test.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: screenshot-diff
-          path: tests/storybook-screenshots.spec.js-snapshots/  # Adjust this path if needed
+          path: tests/storybook-screenshots.spec.js-snapshots/__diff_snapshots__/
+          retention-days: 7  # Keep for 7 days
 
       - name: Fail the Job if Snapshots Changed
         if: failure() || steps.test.outcome == 'failure'
