@@ -7,11 +7,11 @@ on:
       - develop
 
 jobs:
-  storybook:
+  storybook-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm install
 
       - name: Install Playwright Browsers
@@ -28,15 +28,26 @@ jobs:
       - name: Build Storybook
         run: npm run build-storybook
 
-      - name: Start Storybook in the background
+      - name: Start Storybook in the Background
         run: npm run storybook & npx wait-on http://localhost:6006
 
       - name: Run Playwright Tests (Screenshot Comparison)
         run: npx playwright test
 
-      - name: Upload Snapshot Differences (if test fails)
+      # Automatically update snapshots if test fails
+      - name: Update Snapshots if Needed
+        if: failure()
+        run: npx playwright test --update-snapshots
+
+      # Upload updated snapshots as artifacts
+      - name: Upload Updated Snapshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: snapshot-differences
-          path: tests/snapshots-diff/
+          name: updated-snapshots
+          path: tests/storybook-screenshots.spec.js-snapshots/
+
+      # Fail the workflow if snapshots were updated
+      - name: Fail if Snapshots Changed
+        if: failure()
+        run: exit 1
