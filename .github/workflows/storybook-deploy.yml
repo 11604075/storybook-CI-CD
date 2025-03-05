@@ -1,40 +1,41 @@
 name: Storybook CI
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  pull_request:
+      - develop
 
 jobs:
-  build:
+  storybook:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
       - name: Install dependencies
         run: npm install
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Build Storybook
         run: npm run build-storybook
 
-      - name: Deploy to GitHub Pages
-        if: github.event_name == 'push'
-        uses: JamesIves/github-pages-deploy-action@4.1.7
-        with:
-          branch: gh-pages
-          folder: storybook-static
+      - name: Start Storybook in the background
+        run: npm run storybook & npx wait-on http://localhost:6006
 
-      - name: Upload Storybook artifact
-        if: github.event_name == 'pull_request'
+      - name: Capture Storybook Screenshots
+        run: npx playwright test tests/storybook-screenshots.spec.js
+
+      - name: Upload Storybook Screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: storybook-preview
-          path: storybook-static
-
-      - name: Comment PR with Storybook preview
-        if: github.event_name == 'pull_request'
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: "📖 Storybook preview for this PR is available. Download and run it locally to review UI changes."
+          name: storybook-screenshots
+          path: "*.png"
