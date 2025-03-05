@@ -33,15 +33,16 @@ jobs:
 
       - name: Run Playwright Tests (Screenshot Comparison)
         id: test
-        continue-on-error: true  # Continue execution even if test fails
+        continue-on-error: true
         run: npx playwright test
 
-      - name: Debug: List generated files
-        if: always()  # Run this step even if previous steps fail
+      - name: Debug: Check if diff images exist
+        if: always()
         run: |
-          echo "Checking snapshot folder..."
-          if [ -d "tests/storybook-screenshots.spec.js-snapshots/" ]; then
-            ls -R tests/storybook-screenshots.spec.js-snapshots/
+          echo "Checking if diff images exist..."
+          if [ -d "tests/storybook-screenshots.spec.js-snapshots/__diff_snapshots__" ]; then
+            echo "Diff images found:"
+            ls -R tests/storybook-screenshots.spec.js-snapshots/__diff_snapshots__
           else
             echo "No diff images found"
           fi
@@ -51,10 +52,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshot-diff
-          path: |
-            tests/storybook-screenshots.spec.js-snapshots/__diff_snapshots__/
-            tests/**/*.png  # Backup: Upload all PNG files if path is incorrect
-          retention-days: 7  # Keep artifacts for 7 days
+          path: tests/storybook-screenshots.spec.js-snapshots/__diff_snapshots__/
+          retention-days: 7
 
       - name: Fail the Job if Snapshots Changed
         if: failure() || steps.test.outcome == 'failure'
