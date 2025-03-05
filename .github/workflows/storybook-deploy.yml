@@ -1,26 +1,49 @@
 name: Storybook CI
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  pull_request:
+      - develop
 
 jobs:
-  build:
+  storybook-test:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
-      - name: Install dependencies
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
         run: npm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
 
       - name: Build Storybook
         run: npm run build-storybook
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.7
+      - name: Start Storybook in the Background
+        run: npm run storybook & npx wait-on http://localhost:6006
+
+      - name: Run Playwright Tests (Screenshot Comparison)
+        id: test
+        continue-on-error: true
+        run: npx playwright test
+
+      - name: Upload Only Diff Images (if test fails)
+        if: failure() || steps.test.outcome == 'failure'
+        uses: actions/upload-artifact@v4
         with:
-          branch: gh-pages
-          folder: storybook-static
+          name: screenshot-diff
+          path: tests/storybook-screenshots.spec.js-snapshots
+          retention-days: 7
+
+      - name: Fail the Job if Snapshots Changed
+        if: always() && steps.test.outcome == 'failure'
+        run: exit 1
